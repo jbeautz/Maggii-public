@@ -1493,9 +1493,9 @@ const TRIGGER_CLASSES = {
 };
 
 async function fetchReport() {
-  if (STATIC_MODE) return;  // field notes require live Pi connection
   try {
-    const resp = await fetch('/report');
+    const url  = STATIC_MODE ? 'report.json' : '/report';
+    const resp = await fetch(url);
     if (!resp.ok) return;
     const d = await resp.json();
     renderReport(d);
@@ -1986,26 +1986,28 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   let html = '';
 
   /* ---- Audio clip ---- */
-  html += `<div class="audio-section">`;
-  html += `<div class="audio-label">Audio Clip</div>`;
-  if (detection.clip_path) {
-    const fname = detection.clip_path.split('/').pop();
-    html += `
-      <div class="audio-player-wrap" id="aplayer-${escAttr(cardKey)}">
-        <button class="play-btn" id="playbtn-${escAttr(cardKey)}" aria-label="Play">&#x25B6;</button>
-        <div class="audio-progress-wrap">
-          <div class="audio-filename">${escHtml(fname)}</div>
-          <div class="audio-bar-track">
-            <div class="audio-bar-fill" id="abar-${escAttr(cardKey)}"></div>
+  if (!STATIC_MODE) {
+    html += `<div class="audio-section">`;
+    html += `<div class="audio-label">Audio Clip</div>`;
+    if (detection.clip_path) {
+      const fname = detection.clip_path.split('/').pop();
+      html += `
+        <div class="audio-player-wrap" id="aplayer-${escAttr(cardKey)}">
+          <button class="play-btn" id="playbtn-${escAttr(cardKey)}" aria-label="Play">&#x25B6;</button>
+          <div class="audio-progress-wrap">
+            <div class="audio-filename">${escHtml(fname)}</div>
+            <div class="audio-bar-track">
+              <div class="audio-bar-fill" id="abar-${escAttr(cardKey)}"></div>
+            </div>
+            <div class="audio-time" id="atime-${escAttr(cardKey)}">—</div>
           </div>
-          <div class="audio-time" id="atime-${escAttr(cardKey)}">—</div>
         </div>
-      </div>
-    `;
-  } else {
-    html += `<div class="audio-no-clip">No clip available for this detection</div>`;
+      `;
+    } else {
+      html += `<div class="audio-no-clip">No clip available for this detection</div>`;
+    }
+    html += `</div>`;
   }
-  html += `</div>`;
 
   /* ---- BirdNET cross-reference ---- */
   html += bnDetailHtml(detection);
@@ -2152,7 +2154,7 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   detailEl.innerHTML = html;
 
   /* Wire audio and init Leaflet map after DOM is set */
-  if (detection.clip_path) {
+  if (detection.clip_path && !STATIC_MODE) {
     wireAudioPlayer(cardKey, detection.clip_path);
   }
   // Wire per-detection play buttons in chorus list
@@ -2254,23 +2256,25 @@ function populateNearMissDetail(detailEl, ev) {
   let html = '';
 
   /* Audio clip */
-  html += `<div class="audio-section"><div class="audio-label">Audio Clip</div>`;
-  if (fname) {
-    html += `
-      <div class="audio-player-wrap" id="aplayer-${escAttr(cardKey)}">
-        <button class="play-btn" id="playbtn-${escAttr(cardKey)}" aria-label="Play">&#x25B6;</button>
-        <div class="audio-progress-wrap">
-          <div class="audio-filename">${escHtml(fname)}</div>
-          <div class="audio-bar-track">
-            <div class="audio-bar-fill" id="abar-${escAttr(cardKey)}"></div>
+  if (!STATIC_MODE) {
+    html += `<div class="audio-section"><div class="audio-label">Audio Clip</div>`;
+    if (fname) {
+      html += `
+        <div class="audio-player-wrap" id="aplayer-${escAttr(cardKey)}">
+          <button class="play-btn" id="playbtn-${escAttr(cardKey)}" aria-label="Play">&#x25B6;</button>
+          <div class="audio-progress-wrap">
+            <div class="audio-filename">${escHtml(fname)}</div>
+            <div class="audio-bar-track">
+              <div class="audio-bar-fill" id="abar-${escAttr(cardKey)}"></div>
+            </div>
+            <div class="audio-time" id="atime-${escAttr(cardKey)}">—</div>
           </div>
-          <div class="audio-time" id="atime-${escAttr(cardKey)}">—</div>
-        </div>
-      </div>`;
-  } else {
-    html += `<div class="audio-no-clip">No clip saved</div>`;
+        </div>`;
+    } else {
+      html += `<div class="audio-no-clip">No clip saved</div>`;
+    }
+    html += `</div>`;
   }
-  html += `</div>`;
 
   /* Scores */
   html += `<div class="detail-section-title">Classifier Scores</div>`;
@@ -2285,7 +2289,7 @@ function populateNearMissDetail(detailEl, ev) {
 
   detailEl.innerHTML = html;
 
-  if (ev.clip_path) {
+  if (ev.clip_path && !STATIC_MODE) {
     wireAudioPlayer(cardKey, ev.clip_path);
   }
 }
