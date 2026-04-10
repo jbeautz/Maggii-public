@@ -1194,6 +1194,10 @@ html, body {
   to   { opacity: 1; }
 }
 </style>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -1398,7 +1402,7 @@ const expandedCards = new Set();
 const audioElements = {};   // key -> HTMLAudioElement
 const leafletMaps   = {};   // mapDivId -> L.map instance
 
-/* ── Loading Screen ─────────────────────────────────────────────────────── */
+/* ── Loading Screen ─────────────────────────────────────────────────���───── */
 (function initLoader() {
   // Particles
   const pWrap = document.getElementById('particles');
