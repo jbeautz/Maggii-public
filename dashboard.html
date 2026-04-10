@@ -2230,7 +2230,11 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
         e.stopPropagation();
         let audio = audioElements[clipId];
         if (!audio) {
-          audio = new Audio('/' + d.clip_path);
+          const fname    = d.clip_path.split('/').pop();
+          const audioUrl = (STATIC_MODE && R2_CLIP_BASE)
+            ? R2_CLIP_BASE.replace(/\/$/, '') + '/' + fname
+            : '/' + d.clip_path;
+          audio = new Audio(audioUrl);
           audio.preload = 'none';
           audioElements[clipId] = audio;
         }
