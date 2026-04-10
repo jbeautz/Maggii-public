@@ -243,7 +243,7 @@ html, body {
   width: 0%;
   background: linear-gradient(90deg, #3a7d52, #5fba7d, #4db8c0);
   border-radius: 2px;
-  animation: progress-run 3s linear forwards;
+  animation: progress-run 2s linear forwards;
 }
 
 @keyframes progress-run {
@@ -1354,7 +1354,8 @@ function checkGate() {
 
   <!-- Nav bar -->
   <div class="nav-bar">
-    <a class="nav-btn nav-active" href="/">&#x1f3e0; Monitor</a>
+    <a class="nav-btn" href="/">&#x1f331; About</a>
+    <a class="nav-btn nav-active" href="/dashboard">&#x1f4bb; Monitor</a>
     <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; Review</a>
     <a class="nav-btn" href="/map">&#x1f5fa; Map</a>
     <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; Field</a>
@@ -1500,7 +1501,7 @@ const leafletMaps   = {};   // mapDivId -> L.map instance
     wWrap.appendChild(b);
   }
 
-  // After 3s, fade out and show dashboard
+  // After 2s, fade out and show dashboard
   setTimeout(() => {
     const loading = document.getElementById('loading');
     const dash    = document.getElementById('dashboard');
@@ -1509,7 +1510,7 @@ const leafletMaps   = {};   // mapDivId -> L.map instance
     setTimeout(() => { loading.style.display = 'none'; }, 800);
     initPoll();
     relTimeTimer = setInterval(refreshRelativeTimes, 30000);
-  }, 3000);
+  }, 2000);
 })();
 
 /* ── Clock sync — push phone time to Pi on every page load ─────────────── */
