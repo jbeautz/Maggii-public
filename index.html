@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>CricketNode // Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #050805;
+  --panel:   #080c08;
+  --panel2:  #0c100c;
+  --font:    'Courier New', Courier, monospace;
+  --font-ui: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  --green:   #5fba7d;
+  --cyan:    #4db8c0;
+  --yellow:  #c8a04a;
+  --orange:  #c87832;
+  --red:     #c84a4a;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: #c8ffd0;
+  font-family: var(--font);
+  font-size: 13px;
+  overflow: hidden;
+}
+
+/* ── Nav Bar ──────────────────────────────────────────────────────────────── */
+#nav {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #1a1a1a;
+  background: var(--bg);
+  position: relative;
+  z-index: 1000;
+}
+.nav-btn {
+  font-family: var(--font);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #445;
+  background: none;
+  border: 1px solid #1a2a1a;
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-btn:hover { color: #c8ffd0; border-color: #2a4a2a; }
+.nav-btn.nav-active { color: var(--cyan); border-color: var(--cyan); }
+
+/* ── Map fills remaining height ───────────────────────────────────────────── */
+#map-wrap {
+  position: relative;
+  height: calc(100vh - 37px);
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+  background: #0a100a;
+}
+
+/* Dark tile filter */
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.72) contrast(1.1) saturate(0.6);
+}
+.leaflet-container { background: #0a100a; }
+
+/* ── Node popup override ──────────────────────────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: #0c140c;
+  border: 1px solid #1a3a1a;
+  border-radius: 4px;
+  color: #c8ffd0;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.leaflet-popup-tip-container { display: none; }
+.leaflet-popup-content { margin: 10px 14px; }
+.leaflet-popup-close-button { color: #556 !important; }
+.leaflet-popup-close-button:hover { color: #c8ffd0 !important; }
+
+.popup-node-id {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.popup-row {
+  font-size: 10px;
+  color: #556;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+  display: flex;
+  gap: 6px;
+}
+.popup-row span { color: #c8ffd0; }
+.popup-window-label {
+  font-size: 9px;
+  color: #445;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 6px 0 4px;
+  padding-top: 6px;
+  border-top: 1px solid #1a2a1a;
+}
+.popup-detection {
+  font-size: 11px;
+  color: var(--yellow);
+  letter-spacing: 0.06em;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.popup-det-conf { font-size: 10px; color: var(--green); flex-shrink: 0; }
+.popup-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--cyan);
+  text-decoration: none;
+  border: 1px solid #1a3a4a;
+  border-radius: 3px;
+  padding: 3px 8px;
+  letter-spacing: 0.1em;
+}
+.popup-link:hover { color: #fff; border-color: var(--cyan); }
+
+/* ── Status overlay ───────────────────────────────────────────────────────── */
+#status-bar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 800;
+  background: rgba(5,8,5,0.88);
+  border: 1px solid #1a3a1a;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: #445;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+#status-bar .node-count { color: var(--green); }
+
+/* ── Error overlay ───────────────────────────────────────────────────────── */
+#error-msg {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 900;
+  background: rgba(5,8,5,0.95);
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  padding: 20px 28px;
+  text-align: center;
+  color: var(--red);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+/* ── Timeline panel ───────────────────────────────────────────────────────── */
+#timeline-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  background: rgba(5,8,5,0.92);
+  border-top: 1px solid #1a2a1a;
+  padding: 8px 14px 10px;
+  backdrop-filter: blur(4px);
+}
+
+.tl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.tl-title {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #556;
+  text-transform: uppercase;
+}
+.tl-window-label {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 0.06em;
+}
+.tl-det-count {
+  font-family: var(--font);
+  font-size: 9px;
+  color: #445;
+  letter-spacing: 0.06em;
+}
+
+/* Dual-range slider track */
+.tl-track-area {
+  position: relative;
+  height: 28px;
+  margin: 0 2px;
+}
+
+.tl-track-bg {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0; right: 0;
+  height: 3px;
+  background: #1a2a1a;
+  border-radius: 2px;
+}
+
+.tl-track-fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 3px;
+  background: var(--green);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* Tick marks */
+.tl-ticks {
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.tl-tick {
+  position: absolute;
+  width: 1px;
+  height: 8px;
+  background: #2a3a2a;
+  transform: translateY(-50%);
+}
+
+/* Range inputs stacked */
+.tl-track-area input[type=range] {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  margin: 0;
+  height: 28px;
+}
+.tl-track-area input[type=range]::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 3px;
+}
+.tl-track-area input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid #0a0c0a;
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 0 0 1px rgba(95,186,125,0.3);
+}
+.tl-track-area input[type=range]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid #0a0c0a;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+/* Time labels along bottom */
+.tl-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+  pointer-events: none;
+}
+.tl-label {
+  font-family: var(--font);
+  font-size: 8px;
+  color: #445;
+  letter-spacing: 0.04em;
+}
+
+/* ── Detection density ring animation ─────────────────────────────────────── */
+@keyframes det-ring {
+  0%   { transform: scale(0.6); opacity: 0.55; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* ── Birds ── */
+#bird-layer { position:fixed;top:0;left:0;right:0;height:72px;pointer-events:none;z-index:9985;overflow:hidden; }
+.bird { position:absolute;opacity:0;animation:bird-fly linear infinite; }
+@keyframes bird-fly {
+  0%   { transform:translateX(-40px);opacity:0; }
+  4%   { opacity:0.55; }
+  92%  { opacity:0.4; }
+  100% { transform:translateX(calc(100vw + 40px));opacity:0; }
+}
+</style>
+</head>
+<body>
+<div id="bird-layer">
+  <svg class="bird" style="top:14px;animation-duration:31s;animation-delay:0s"   width="18" height="10" viewBox="0 0 18 10"><path d="M0,7 Q4.5,0 9,4 Q13.5,0 18,7" fill="none" stroke="#5fba7d" stroke-width="1.4" stroke-linecap="round"/></svg>
+  <svg class="bird" style="top:42px;animation-duration:24s;animation-delay:9s"   width="13" height="7"  viewBox="0 0 13 7"><path d="M0,5 Q3.25,0 6.5,3 Q9.75,0 13,5" fill="none" stroke="#5fba7d" stroke-width="1.1" stroke-linecap="round"/></svg>
+  <svg class="bird" style="top:22px;animation-duration:38s;animation-delay:18s"  width="22" height="12" viewBox="0 0 22 12"><path d="M0,9 Q5.5,0 11,5 Q16.5,0 22,9" fill="none" stroke="#4db8c0" stroke-width="1.2" stroke-linecap="round"/></svg>
+  <svg class="bird" style="top:56px;animation-duration:27s;animation-delay:5s"   width="14" height="8"  viewBox="0 0 14 8"><path d="M0,6 Q3.5,0 7,3 Q10.5,0 14,6"  fill="none" stroke="#5fba7d" stroke-width="1.0" stroke-linecap="round"/></svg>
+  <svg class="bird" style="top:32px;animation-duration:43s;animation-delay:25s"  width="16" height="9"  viewBox="0 0 16 9"><path d="M0,7 Q4,0 8,4 Q12,0 16,7"    fill="none" stroke="#4db8c0" stroke-width="1.1" stroke-linecap="round"/></svg>
+</div>
+
+<div id="nav">
+  <a class="nav-btn" href="/">&#x1f3e0; MONITOR</a>
+  <a class="nav-btn" href="/review">&#x1f3f7; REVIEW</a>
+  <a class="nav-btn nav-active" href="/map">&#x1f5fa; MAP</a>
+  <a class="nav-btn" href="/field">&#x1f52c; FIELD</a>
+</div>
+
+<div id="map-wrap">
+  <div id="map"></div>
+
+  <div id="status-bar">
+    NODES: <span class="node-count" id="node-count">—</span>
+    &nbsp;|&nbsp;
+    <span id="last-update">LOADING...</span>
+  </div>
+  <div id="error-msg">⚠ COULD NOT LOAD NODE DATA<br><small>Check server connection</small></div>
+
+  <!-- Timeline -->
+  <div id="timeline-panel">
+    <div class="tl-header">
+      <span class="tl-title">Time Window</span>
+      <span class="tl-window-label" id="tl-window-label">Last 24 h</span>
+      <span class="tl-det-count" id="tl-det-count"></span>
+    </div>
+    <div class="tl-track-area" id="tl-track-area">
+      <div class="tl-track-bg"></div>
+      <div class="tl-ticks" id="tl-ticks"></div>
+      <div class="tl-track-fill" id="tl-track-fill"></div>
+      <input type="range" id="tl-start" min="0" max="100" value="0" step="1">
+      <input type="range" id="tl-end"   min="0" max="100" value="100" step="1">
+    </div>
+    <div class="tl-labels">
+      <span class="tl-label" id="tl-label-left">24h ago</span>
+      <span class="tl-label" id="tl-label-mid"></span>
+      <span class="tl-label" id="tl-label-right">Now</span>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// Detect GitHub Pages / any non-local host → serve from static snapshot files
+const STATIC_MODE = (() => {
+  const h = window.location.hostname;
+  return h !== '' && h !== 'localhost' &&
+         !h.endsWith('.local') &&
+         !h.startsWith('10.') && !h.startsWith('192.168.') && !h.startsWith('172.');
+})();
+
+const API_BASE   = '';
+const REFRESH_MS = STATIC_MODE ? 300_000 : 30_000;   // static: re-fetch snapshot every 5 min
+const HIST_MS    = 300_000;  // history reload every 5 min
+
+// ── Leaflet setup ─────────────────────────────────────────────────────────────
+const map = L.map('map', {
+  zoomControl: true,
+  attributionControl: false,
+}).setView([37.88, -122.26], 14);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allNodes      = [];
+let historyEvents = [];               // { type, timestamp, epoch_ms, node_id, lat, lon, species, confidence }
+let historyRange  = { earliest_ms: null, latest_ms: null };
+let tlStartPct    = 0;
+let tlEndPct      = 100;
+let firstLoad     = true;
+
+const nodeMarkers = {};   // id → Leaflet marker (current node positions)
+const histMarkers = {};   // "lat3,lon3" → Leaflet marker (clustered detection history)
+
+// ── Timeline helpers ───────────────────────────────────────────────────────────
+function tlEarliestMs() {
+  return historyRange.earliest_ms || (Date.now() - 24 * 3_600_000);
+}
+
+function tlPctToMs(pct) {
+  const nowMs  = Date.now();
+  const earlyMs = tlEarliestMs();
+  return earlyMs + (pct / 100) * (nowMs - earlyMs);
+}
+
+function fmtDate(ms) {
+  const d = new Date(ms);
+  const rangeMs = Date.now() - tlEarliestMs();
+  if (rangeMs > 24 * 3_600_000) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function fmtWindowLabel(startMs, endMs) {
+  const durMs = endMs - startMs;
+  const durH  = durMs / 3_600_000;
+  const durD  = durMs / 86_400_000;
+  if (durD >= 1.5) return `${Math.round(durD)} days`;
+  if (durD >= 0.95) return '1 day';
+  if (durH >= 1) return `${Math.round(durH)}h window`;
+  return `${Math.round(durMs / 60000)}m window`;
+}
+
+function buildTicks() {
+  const ticks   = document.getElementById('tl-ticks');
+  ticks.innerHTML = '';
+  const nowMs   = Date.now();
+  const earlyMs = tlEarliestMs();
+  const rangeMs = nowMs - earlyMs;
+  const rangeDays = rangeMs / 86_400_000;
+
+  // Choose tick step
+  const stepMs = rangeDays > 14 ? 2 * 86_400_000
+               : rangeDays > 3  ? 86_400_000
+               : rangeDays > 1  ? 6 * 3_600_000
+               :                  4 * 3_600_000;
+
+  // Start at first tick boundary after earliest
+  const first = new Date(earlyMs);
+  first.setMinutes(0, 0, 0);
+  let cur = first.getTime() + stepMs;
+
+  while (cur < nowMs) {
+    const pct  = ((cur - earlyMs) / rangeMs) * 100;
+    const tick = document.createElement('div');
+    tick.className = 'tl-tick';
+    tick.style.left = pct + '%';
+    ticks.appendChild(tick);
+    cur += stepMs;
+  }
+}
+
+function updateTimeline() {
+  const startMs = tlPctToMs(tlStartPct);
+  const endMs   = tlPctToMs(tlEndPct);
+
+  // Track fill
+  document.getElementById('tl-track-fill').style.left  = tlStartPct + '%';
+  document.getElementById('tl-track-fill').style.width = (tlEndPct - tlStartPct) + '%';
+
+  // Edge labels
+  document.getElementById('tl-label-left').textContent  = fmtDate(tlEarliestMs());
+  document.getElementById('tl-label-right').textContent = 'Now';
+
+  // Mid label (only when window is narrowed)
+  const midEl = document.getElementById('tl-label-mid');
+  if (tlEndPct - tlStartPct < 90) {
+    midEl.textContent = fmtDate((startMs + endMs) / 2);
+    midEl.style.left  = ((tlStartPct + tlEndPct) / 2) + '%';
+    midEl.style.transform = 'translateX(-50%)';
+    midEl.style.position  = 'absolute';
+  } else {
+    midEl.textContent = '';
+  }
+
+  document.getElementById('tl-window-label').textContent = fmtWindowLabel(startMs, endMs);
+
+  // Event counts
+  let dets = 0, nms = 0;
+  historyEvents.forEach(e => {
+    if (e.epoch_ms >= startMs && e.epoch_ms <= endMs) {
+      if (e.type === 'detection') dets++;
+      else nms++;
+    }
+  });
+  const countEl = document.getElementById('tl-det-count');
+  let label = '';
+  if (dets) label = `${dets} det${dets > 1 ? 's' : ''}`;
+  if (nms)  label += (label ? '  ·  ' : '') + `${nms} near-miss${nms > 1 ? 'es' : ''}`;
+  countEl.textContent = label;
+
+  renderHistoryMarkers();
+  renderNodeMarkers();
+}
+
+// ── History clustering ─────────────────────────────────────────────────────────
+// Group events by rounded lat/lon (3dp ≈ 100 m grid)
+function clusterEvents(startMs, endMs) {
+  const cells = {};
+  historyEvents.forEach(e => {
+    if (e.epoch_ms < startMs || e.epoch_ms > endMs) return;
+    const key = e.lat.toFixed(3) + ',' + e.lon.toFixed(3);
+    if (!cells[key]) cells[key] = { lat: e.lat, lon: e.lon, detections: [], nearMisses: [] };
+    if (e.type === 'detection') cells[key].detections.push(e);
+    else                        cells[key].nearMisses.push(e);
+  });
+  return Object.entries(cells).map(([key, c]) => ({ key, ...c }));
+}
+
+// ── History marker icons ───────────────────────────────────────────────────────
+function makeHistIcon(detCount, nmCount) {
+  const color  = detCount > 0 ? '#5fba7d' : '#c8a04a';
+  const total  = detCount + nmCount;
+  const rings  = total === 0 ? 0 : total <= 4 ? 1 : total <= 12 ? 2 : 3;
+
+  let ringHtml = '';
+  for (let i = 0; i < rings; i++) {
+    const baseR = 11 + i * 9;
+    const delay = (i * 0.9).toFixed(1);
+    const dur   = (2.2 + i * 0.5).toFixed(1);
+    ringHtml += `<div style="
+      position:absolute;border-radius:50%;
+      border:1.5px solid ${color};
+      width:${baseR * 2}px;height:${baseR * 2}px;
+      top:${7 - baseR}px;left:${7 - baseR}px;
+      opacity:0;animation:det-ring ${dur}s ease-out ${delay}s infinite;
+    "></div>`;
+  }
+
+  const badge = total > 1
+    ? `<div style="
+        position:absolute;top:-6px;right:-7px;
+        background:${color};color:#000;
+        font-family:'Courier New',monospace;font-size:9px;font-weight:bold;
+        border-radius:8px;padding:1px 5px;line-height:1.5;
+        white-space:nowrap;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,0.5)
+      ">${total}</div>`
+    : '';
+
+  return L.divIcon({
+    className: '',
+    html: `<div style="position:relative;width:14px;height:14px">
+             ${ringHtml}
+             <div style="
+               width:14px;height:14px;background:${color};
+               border:2px solid #050805;border-radius:50%;
+               box-shadow:0 0 6px ${color}66;position:relative;z-index:1
+             "></div>
+             ${badge}
+           </div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -14],
+  });
+}
+
+// ── History marker popup ───────────────────────────────────────────────────────
+function buildHistPopup(cluster) {
+  // Group by species, best confidence
+  const sp = {};
+  [...cluster.detections, ...cluster.nearMisses].forEach(e => {
+    if (!sp[e.species] || e.confidence > sp[e.species].conf) {
+      sp[e.species] = { conf: e.confidence, count: 0, type: e.type };
+    }
+    sp[e.species].count++;
+  });
+  const entries = Object.entries(sp).sort((a, b) => b[1].conf - a[1].conf).slice(0, 8);
+
+  // Date range of events in this cluster
+  const allMs = [...cluster.detections, ...cluster.nearMisses].map(e => e.epoch_ms).filter(Boolean);
+  const minMs = Math.min(...allMs);
+  const maxMs = Math.max(...allMs);
+  const dateRange = allMs.length
+    ? (minMs === maxMs
+        ? new Date(minMs).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false })
+        : new Date(minMs).toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' – ' +
+          new Date(maxMs).toLocaleDateString('en-US', { month:'short', day:'numeric' }))
+    : '';
+
+  const dList = entries.map(([name, info]) => {
+    const pct   = Math.round(info.conf * 100);
+    const label = info.type === 'near_miss' ? '〜' : '🐦';
+    const times = info.count > 1 ? `<span style="font-size:9px;color:#445">${info.count}×</span>` : '';
+    return `<div class="popup-detection">${label} ${esc(name)} ${times}<span class="popup-det-conf">${pct}%</span></div>`;
+  }).join('');
+
+  const locStr = `${cluster.lat.toFixed(4)}, ${cluster.lon.toFixed(4)}`;
+  const detLbl = cluster.detections.length ? `${cluster.detections.length} detection${cluster.detections.length > 1 ? 's' : ''}` : '';
+  const nmLbl  = cluster.nearMisses.length  ? `${cluster.nearMisses.length} near-miss${cluster.nearMisses.length > 1 ? 'es' : ''}` : '';
+  const summaryParts = [detLbl, nmLbl].filter(Boolean);
+
+  return `<div class="popup-node-id" style="color:var(--green)">${summaryParts.join(' · ')}</div>
+    <div class="popup-row">GPS <span>${esc(locStr)}</span></div>
+    ${dateRange ? `<div class="popup-row">DATE <span>${esc(dateRange)}</span></div>` : ''}
+    <div class="popup-window-label">Species detected</div>
+    ${dList || '<div class="popup-detection" style="color:#334;font-size:10px">None</div>'}`;
+}
+
+// ── Render history markers ─────────────────────────────────────────────────────
+function renderHistoryMarkers() {
+  const startMs  = tlPctToMs(tlStartPct);
+  const endMs    = tlPctToMs(tlEndPct);
+  const clusters = clusterEvents(startMs, endMs);
+  const seen     = new Set();
+
+  clusters.forEach(c => {
+    seen.add(c.key);
+    const icon  = makeHistIcon(c.detections.length, c.nearMisses.length);
+    const popup = buildHistPopup(c);
+
+    if (histMarkers[c.key]) {
+      histMarkers[c.key].setIcon(icon);
+      histMarkers[c.key].getPopup()?.setContent(popup);
+    } else {
+      histMarkers[c.key] = L.marker([c.lat, c.lon], { icon })
+        .bindPopup(popup, { maxWidth: 260, closeOnClick: false })
+        .addTo(map);
+    }
+  });
+
+  Object.keys(histMarkers).forEach(key => {
+    if (!seen.has(key)) { histMarkers[key].remove(); delete histMarkers[key]; }
+  });
+}
+
+// ── Node marker icon (current position) ───────────────────────────────────────
+function makeNodeIcon(isSelf, isOnline) {
+  const color = isSelf ? '#5fba7d' : isOnline ? '#4db8c0' : '#c84a4a';
+  const ping  = isSelf
+    ? `<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ${color};opacity:0.35;animation:ping 2.5s ease-out infinite"></div>`
+    : '';
+  return L.divIcon({
+    className: '',
+    html: `<div style="position:relative;width:20px;height:20px">
+             ${ping}
+             <div style="
+               width:20px;height:20px;background:${color};
+               border:3px solid #050805;border-radius:3px;
+               box-shadow:0 0 8px ${color}77;
+               position:relative;z-index:1
+             "></div>
+           </div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -14],
+  });
+}
+
+function buildNodePopup(node) {
+  const gps = node.gps || {};
+  const env = node.env || {};
+  const wx  = node.weather || {};
+  const lat = (gps.lat || 0).toFixed(5);
+  const lon = (gps.lon || 0).toFixed(5);
+  const envRow = env.temp_c != null
+    ? `<div class="popup-row">ENV <span>${env.temp_c.toFixed(1)}°C · ${env.humidity_pct?.toFixed(0)}% RH</span></div>` : '';
+  const wxRow  = wx.condition
+    ? `<div class="popup-row">WX <span>${wx.condition} · ${wx.temp_c}°C</span></div>` : '';
+  const status = node.online !== false ? '<span style="color:var(--green)">ONLINE</span>' : '<span style="color:var(--red)">OFFLINE</span>';
+  return `<div class="popup-node-id">${esc(node.node_id || ('Node ' + node.address))}${node.self ? ' ★' : ''} ${status}</div>
+    <div class="popup-row">GPS <span>${lat}, ${lon}</span></div>
+    ${envRow}${wxRow}
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <a class="popup-link" href="/">📡 Monitor</a>
+      <a class="popup-link" href="/field">🔬 Field</a>
+    </div>`;
+}
+
+function renderNodeMarkers() {
+  const seen = new Set();
+  allNodes.filter(n => n.gps?.fix && n.gps?.lat && n.gps?.lon).forEach(node => {
+    const id   = node.node_id || String(node.address);
+    const icon = makeNodeIcon(!!node.self, node.online !== false);
+    const popup = buildNodePopup(node);
+    seen.add(id);
+    if (nodeMarkers[id]) {
+      nodeMarkers[id].setLatLng([node.gps.lat, node.gps.lon]);
+      nodeMarkers[id].setIcon(icon);
+      nodeMarkers[id].getPopup()?.setContent(popup);
+    } else {
+      nodeMarkers[id] = L.marker([node.gps.lat, node.gps.lon], { icon, zIndexOffset: 500 })
+        .bindPopup(popup, { maxWidth: 260, closeOnClick: false })
+        .addTo(map);
+    }
+  });
+  Object.keys(nodeMarkers).forEach(id => {
+    if (!seen.has(id)) { nodeMarkers[id].remove(); delete nodeMarkers[id]; }
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── History load ───────────────────────────────────────────────────────────────
+async function loadHistory() {
+  try {
+    const url  = STATIC_MODE ? 'history.json' : `${API_BASE}/history`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    historyEvents = data.events || [];
+    historyRange  = { earliest_ms: data.earliest_ms, latest_ms: data.latest_ms };
+    buildTicks();
+    updateTimeline();
+
+    // On first history load, fit map to all detection points
+    if (firstLoad && historyEvents.length) {
+      firstLoad = false;
+      const lats = historyEvents.map(e => e.lat);
+      const lons = historyEvents.map(e => e.lon);
+      const bounds = [[Math.min(...lats), Math.min(...lons)], [Math.max(...lats), Math.max(...lons)]];
+      map.fitBounds(bounds, { padding: [40, 80] });
+    }
+  } catch(err) {
+    console.error('History load error:', err);
+  }
+}
+
+// ── Live node refresh ──────────────────────────────────────────────────────────
+async function refresh() {
+  try {
+    const url  = STATIC_MODE ? 'data.json' : `${API_BASE}/data`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    allNodes = data.nodes || [];
+
+    document.getElementById('node-count').textContent =
+      allNodes.filter(n => n.gps?.fix).length;
+    const updLabel = STATIC_MODE ? 'SNAPSHOT ' : 'UPDATED ';
+    document.getElementById('last-update').textContent =
+      updLabel + new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    document.getElementById('error-msg').style.display = 'none';
+
+    renderNodeMarkers();
+  } catch(err) {
+    console.error('Map refresh error:', err);
+  }
+}
+
+// ── Timeline slider wiring ─────────────────────────────────────────────────────
+const startEl = document.getElementById('tl-start');
+const endEl   = document.getElementById('tl-end');
+const MIN_GAP = 2;  // minimum 2% gap
+
+startEl.addEventListener('input', () => {
+  tlStartPct = Math.min(parseInt(startEl.value), tlEndPct - MIN_GAP);
+  startEl.value = tlStartPct;
+  updateTimeline();
+});
+
+endEl.addEventListener('input', () => {
+  tlEndPct = Math.max(parseInt(endEl.value), tlStartPct + MIN_GAP);
+  endEl.value = tlEndPct;
+  updateTimeline();
+});
+
+// Inject keyframes
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes ping {
+    0%   { transform: scale(1); opacity: 0.35; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes det-ring {
+    0%   { transform: scale(0.6); opacity: 0.55; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
+// Boot
+loadHistory();
+refresh();
+setInterval(refresh, REFRESH_MS);
+setInterval(loadHistory, HIST_MS);
+</script>
+</body>
+</html>
