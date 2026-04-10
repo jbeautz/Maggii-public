@@ -1440,6 +1440,9 @@ const STATIC_MODE = (() => {
          !h.startsWith('10.') && !h.startsWith('192.168.') && !h.startsWith('172.');
 })();
 
+// R2 public URL for audio clips
+const R2_CLIP_BASE = 'https://pub-fbadc80b23f94a2bbc8e9802b0f0b9aa.r2.dev';
+
 if (STATIC_MODE) {
   document.getElementById('nav-review').style.display = 'none';
   document.getElementById('nav-field').style.display  = 'none';
@@ -2045,7 +2048,7 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   let html = '';
 
   /* ---- Audio clip ---- */
-  if (!STATIC_MODE) {
+  if (!STATIC_MODE || R2_CLIP_BASE) {
     html += `<div class="audio-section">`;
     html += `<div class="audio-label">Audio Clip</div>`;
     if (detection.clip_path) {
@@ -2213,7 +2216,7 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   detailEl.innerHTML = html;
 
   /* Wire audio and init Leaflet map after DOM is set */
-  if (detection.clip_path && !STATIC_MODE) {
+  if (detection.clip_path && (!STATIC_MODE || R2_CLIP_BASE)) {
     wireAudioPlayer(cardKey, detection.clip_path);
   }
   // Wire per-detection play buttons in chorus list
@@ -2315,7 +2318,7 @@ function populateNearMissDetail(detailEl, ev) {
   let html = '';
 
   /* Audio clip */
-  if (!STATIC_MODE) {
+  if (!STATIC_MODE || R2_CLIP_BASE) {
     html += `<div class="audio-section"><div class="audio-label">Audio Clip</div>`;
     if (fname) {
       html += `
@@ -2348,7 +2351,7 @@ function populateNearMissDetail(detailEl, ev) {
 
   detailEl.innerHTML = html;
 
-  if (ev.clip_path && !STATIC_MODE) {
+  if (ev.clip_path && (!STATIC_MODE || R2_CLIP_BASE)) {
     wireAudioPlayer(cardKey, ev.clip_path);
   }
 }
@@ -2357,7 +2360,11 @@ function populateNearMissDetail(detailEl, ev) {
 function wireAudioPlayer(key, clipPath) {
   // Lazily create the audio element
   if (!audioElements[key]) {
-    const audio = new Audio('/' + clipPath);
+    const fname    = clipPath.split('/').pop();
+    const audioUrl = (STATIC_MODE && R2_CLIP_BASE)
+      ? R2_CLIP_BASE.replace(/\/$/, '') + '/' + fname
+      : '/' + clipPath;
+    const audio = new Audio(audioUrl);
     audio.preload = 'none';
     audioElements[key] = audio;
   }
