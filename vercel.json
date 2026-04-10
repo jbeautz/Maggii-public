@@ -1,4 +1,7 @@
 {
+  "routes": [
+    { "src": "/map", "dest": "/map.html" }
+  ],
   "headers": [
     {
       "source": "/data.json",
