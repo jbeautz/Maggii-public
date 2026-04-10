@@ -424,7 +424,7 @@ html, body {
 .section-body p + p { margin-top: 14px; }
 .section-body strong { color: #b09060; }
 
-/* ── Photo placeholder ───────────────────────────────────────────────────── */
+/* ── Photo grid ──────────────────────────────────────────────────────────── */
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -433,24 +433,31 @@ html, body {
 }
 .photo-slot {
   aspect-ratio: 4/3;
-  background: var(--bg3);
-  border: 1px dashed var(--border);
   border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg3);
+  border: 1px solid var(--border);
 }
-.photo-slot-icon {
-  font-size: 28px;
-  opacity: 0.3;
+.photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
 }
-.photo-slot-label {
+.photo-slot:hover img {
+  transform: scale(1.03);
+}
+.photo-slot-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 6px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.65));
   font-family: var(--font);
   font-size: 9px;
-  letter-spacing: 0.2em;
-  color: var(--dim);
+  letter-spacing: 0.15em;
+  color: rgba(200,160,74,0.75);
   text-transform: uppercase;
 }
 
@@ -809,16 +816,20 @@ function checkGate() {
     </div>
     <div class="photo-grid">
       <div class="photo-slot">
-        <div class="photo-slot-icon">📷</div>
-        <div class="photo-slot-label">Field Site — Coming Soon</div>
+        <img src="/images/cricketnode-hardware.jpg" alt="CricketNode prototype v1">
+        <div class="photo-slot-caption">CricketNode · Prototype v1</div>
       </div>
       <div class="photo-slot">
-        <div class="photo-slot-icon">🎙️</div>
-        <div class="photo-slot-label">CricketNode Hardware</div>
+        <img src="/images/east-bay-hills.jpg" alt="East Bay hills landscape">
+        <div class="photo-slot-caption">East Bay Hills</div>
       </div>
       <div class="photo-slot">
-        <div class="photo-slot-icon">🌿</div>
-        <div class="photo-slot-label">Habitat Detail</div>
+        <img src="/images/foggy-canyon.jpg" alt="Foggy forested canyon">
+        <div class="photo-slot-caption">Foggy Canyon</div>
+      </div>
+      <div class="photo-slot">
+        <img src="/images/jack-in-tree.jpg" alt="Jack in a tree in the hills">
+        <div class="photo-slot-caption">Field Work</div>
       </div>
     </div>
   </div>
