@@ -1409,9 +1409,10 @@ function checkGate() {
         <div class="notes-stats" id="notes-stats"></div>
         <div class="notes-footer">
           <span class="notes-eta" id="notes-eta"></span>
-          <button class="notes-generate-btn" id="notes-generate-btn" onclick="requestFreshReport()">
+          <button class="notes-generate-btn" id="notes-generate-btn" onclick="requestFreshReport()" style="display:none">
             ↻ Generate Fresh Report
           </button>
+          <span class="notes-generate-btn" id="notes-static-label" style="display:none;cursor:default;border-color:#1a2a1a;color:var(--ts)">Updated nightly</span>
         </div>
       </div>
     </div>
@@ -1444,8 +1445,11 @@ const STATIC_MODE = (() => {
 const R2_CLIP_BASE = 'https://pub-fbadc80b23f94a2bbc8e9802b0f0b9aa.r2.dev';
 
 if (STATIC_MODE) {
-  document.getElementById('nav-review').style.display = 'none';
-  document.getElementById('nav-field').style.display  = 'none';
+  document.getElementById('nav-review').style.display       = 'none';
+  document.getElementById('nav-field').style.display        = 'none';
+  document.getElementById('notes-static-label').style.display = '';
+} else {
+  document.getElementById('notes-generate-btn').style.display = '';
 }
 
 /* ── State ──────────────────────────────────────────────────────────────── */
@@ -1736,7 +1740,10 @@ function updateHeader(data) {
   const updEl      = document.getElementById('headerUpdated');
   const gpsDot     = document.getElementById('gpsDot');
 
-  nodeEl.textContent = data.tap_node || '—';
+  const rawNode = data.tap_node || '—';
+  nodeEl.textContent = STATIC_MODE
+    ? rawNode.replace(/[-_]?poc[-_]?/i, '-').replace(/--+/, '-').replace(/^-|-$/,'')
+    : rawNode;
 
   if (lastUpdated) {
     updEl.textContent = 'upd ' + formatRelTime(lastUpdated / 1000);
@@ -1891,7 +1898,7 @@ function renderActivityFeed(events, confirmedDetections, gps) {
       if (isOpen) populateDetail(card.querySelector('.card-detail'), ev, confirmedDetections, gps);
       list.appendChild(card);
 
-    } else if (type === 'near_miss') {
+    } else if (type === 'near_miss' && !STATIC_MODE) {
       const blendPct = Math.round((ev.blend || ev.confidence || 0) * 100);
       const simPct   = Math.round((ev.sim || 0) * 100);
       if (ev.confidence == null) ev.confidence = ev.blend || 0;
@@ -2071,8 +2078,8 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
     html += `</div>`;
   }
 
-  /* ---- BirdNET cross-reference ---- */
-  html += bnDetailHtml(detection);
+  /* ---- BirdNET cross-reference — local only ---- */
+  if (!STATIC_MODE) html += bnDetailHtml(detection);
 
   /* ---- Chorus detection list (shown when _chorus present) ---- */
   if (detection._chorus && detection._chorus.length > 1) {
@@ -2350,8 +2357,10 @@ function populateNearMissDetail(detailEl, ev) {
   html += `<span style="color:#445;font-size:10px">Below detection threshold — clip saved for review</span>`;
   html += `</div>`;
 
-  /* Review link */
-  html += `<a class="event-review-link" href="/review" style="margin-top:10px;display:inline-block">Label in Review ›</a>`;
+  /* Review link — local only */
+  if (!STATIC_MODE) {
+    html += `<a class="event-review-link" href="/review" style="margin-top:10px;display:inline-block">Label in Review ›</a>`;
+  }
 
   detailEl.innerHTML = html;
 
@@ -2441,11 +2450,16 @@ function renderAmbient(ambient) {
   const chorus = ambient.chorus_active
     ? '<div class="chorus-badge">CHORUS</div>' : '';
 
+  const ambientNote = STATIC_MODE
+    ? `<div style="font-size:9px;color:var(--ts);letter-spacing:0.06em;margin-top:4px">Site ambient — classifications reflect local acoustic conditions</div>`
+    : '';
+
   area.innerHTML = `
     <div class="ambient-strip">
       <div class="ambient-left">
         <div class="ambient-label">${escHtml(ambient.label || '—')}</div>
         ${pct ? `<div class="ambient-bird-pct">${pct}</div>` : ''}
+        ${ambientNote}
       </div>
       ${chorus}
     </div>
