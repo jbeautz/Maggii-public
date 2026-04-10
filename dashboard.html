@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>CricketNode Field Monitor</title>
+<title>Cricket Field Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
@@ -992,6 +992,12 @@ html, body {
   color: #b8d4bc;
   font-style: italic;
 }
+.notes-body p {
+  margin: 0 0 0.8em 0;
+}
+.notes-body p:last-child {
+  margin-bottom: 0;
+}
 .notes-body.generating {
   color: #445;
   font-style: normal;
@@ -1236,7 +1242,7 @@ function checkGate() {
 </head>
 <body>
 <div id="cn-gate">
-  <div class="gate-logo">CRICKETNODE</div>
+  <div class="gate-logo">CRICKET</div>
   <div class="gate-title">FIELD NETWORK</div>
   <input id="cn-gate-input" type="password" placeholder="access code" autocomplete="off"
          onkeydown="if(event.key==='Enter') checkGate()">
@@ -1263,7 +1269,7 @@ function checkGate() {
     <div class="load-brand">STEADY ACRE</div>
     <div class="load-brand-sub">Finding intelligent life on earth</div>
   </div>
-  <div class="load-tagline">CricketNode · Acoustic Monitoring</div>
+  <div class="load-tagline">Cricket · Acoustic Monitoring</div>
   <div class="load-maggii">a Maggii Software product</div>
   <div class="load-title">STEADY ACRE</div>
 
@@ -1305,7 +1311,7 @@ function checkGate() {
 <!-- ── Main Dashboard ─────────────────────────────────────────────────────── -->
 <div id="dashboard">
   <div class="header">
-    <div class="header-title">// CRICKETNODE //</div>
+    <div class="header-title">// CRICKET //</div>
     <div class="header-right">
       <div class="header-node" id="headerNode">—</div>
       <div class="header-meta">
@@ -1363,7 +1369,7 @@ function checkGate() {
 
     <!-- Field Notes -->
     <div class="section" id="fieldNotesSection">
-      <div class="section-title section-title-notes">Field Notes <span style="font-size:9px;font-weight:400;letter-spacing:0.08em;color:var(--ts);margin-left:8px">produced by CricketNode · local AI</span></div>
+      <div class="section-title section-title-notes">Field Notes <span style="font-size:9px;font-weight:400;letter-spacing:0.08em;color:var(--ts);margin-left:8px">produced by Cricket · local AI</span></div>
       <div id="field-notes-card">
         <div class="notes-meta">
           <span class="notes-date" id="notes-date">—</span>
@@ -1584,9 +1590,12 @@ function renderReport(d) {
     triggersEl.appendChild(badge);
   });
 
-  // Narrative
-  bodyEl.textContent = d.narrative;
-  bodyEl.className   = 'notes-body';
+  // Narrative — split on double newline for paragraph breaks
+  bodyEl.innerHTML = d.narrative
+    .split(/\n\n+/)
+    .map(p => `<p>${p.replace(/\n/g, ' ').trim()}</p>`)
+    .join('');
+  bodyEl.className = 'notes-body';
 
   // Stats row
   statsEl.innerHTML = '';
@@ -1720,7 +1729,7 @@ function updateHeader(data) {
   const updEl      = document.getElementById('headerUpdated');
   const gpsDot     = document.getElementById('gpsDot');
 
-  nodeEl.textContent = STATIC_MODE ? 'Steady Acres' : (data.tap_node || '—');
+  nodeEl.textContent = STATIC_MODE ? 'Steady Acre' : (data.tap_node || '—');
 
   if (lastUpdated) {
     updEl.textContent = 'upd ' + formatRelTime(lastUpdated / 1000);
