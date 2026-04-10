@@ -341,9 +341,9 @@ html, body {
 
 <div id="nav">
   <a class="nav-btn" href="/">&#x1f3e0; MONITOR</a>
-  <a class="nav-btn" href="/review">&#x1f3f7; REVIEW</a>
+  <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; REVIEW</a>
   <a class="nav-btn nav-active" href="/map">&#x1f5fa; MAP</a>
-  <a class="nav-btn" href="/field">&#x1f52c; FIELD</a>
+  <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; FIELD</a>
 </div>
 
 <div id="map-wrap">
@@ -388,6 +388,11 @@ const STATIC_MODE = (() => {
          !h.endsWith('.local') &&
          !h.startsWith('10.') && !h.startsWith('192.168.') && !h.startsWith('172.');
 })();
+
+if (STATIC_MODE) {
+  document.getElementById('nav-review').style.display = 'none';
+  document.getElementById('nav-field').style.display  = 'none';
+}
 
 const API_BASE   = '';
 const REFRESH_MS = STATIC_MODE ? 300_000 : 30_000;   // static: re-fetch snapshot every 5 min

@@ -1296,9 +1296,9 @@ html, body {
   <!-- Nav bar -->
   <div class="nav-bar">
     <a class="nav-btn nav-active" href="/">&#x1f3e0; Monitor</a>
-    <a class="nav-btn" href="/review">&#x1f3f7; Review</a>
+    <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; Review</a>
     <a class="nav-btn" href="/map">&#x1f5fa; Map</a>
-    <a class="nav-btn" href="/field">&#x1f52c; Field</a>
+    <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; Field</a>
   </div>
 
   <div class="content" id="contentArea">
@@ -1380,6 +1380,11 @@ const STATIC_MODE = (() => {
          !h.endsWith('.local') &&
          !h.startsWith('10.') && !h.startsWith('192.168.') && !h.startsWith('172.');
 })();
+
+if (STATIC_MODE) {
+  document.getElementById('nav-review').style.display = 'none';
+  document.getElementById('nav-field').style.display  = 'none';
+}
 
 /* ── State ──────────────────────────────────────────────────────────────── */
 let lastData       = null;
