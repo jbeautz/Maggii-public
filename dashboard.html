@@ -1677,6 +1677,22 @@ function handleData(data) {
 
   const nodes = data.nodes || [];
 
+  if (STATIC_MODE) {
+    // Public site: merge all nodes into one unified feed, no per-node UI
+    document.getElementById('nodeTabsSection').style.display = 'none';
+    const selfNode = nodes.find(n => n.self) || nodes[0] || {};
+    const merged = {
+      ...selfNode,
+      detections: nodes.flatMap(n => n.detections || [])
+                       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+      events:     nodes.flatMap(n => n.events || [])
+                       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+    };
+    renderNode(merged);
+    updateHeader(data);
+    return;
+  }
+
   // Ensure activeNodeId is valid
   if (!activeNodeId || !nodes.find(n => n.node_id === activeNodeId)) {
     const self = nodes.find(n => n.self) || nodes[0];
@@ -1740,10 +1756,7 @@ function updateHeader(data) {
   const updEl      = document.getElementById('headerUpdated');
   const gpsDot     = document.getElementById('gpsDot');
 
-  const rawNode = data.tap_node || '—';
-  nodeEl.textContent = STATIC_MODE
-    ? rawNode.replace(/[-_]?poc[-_]?/i, '-').replace(/--+/, '-').replace(/^-|-$/,'')
-    : rawNode;
+  nodeEl.textContent = STATIC_MODE ? 'Steady Acres' : (data.tap_node || '—');
 
   if (lastUpdated) {
     updEl.textContent = 'upd ' + formatRelTime(lastUpdated / 1000);
