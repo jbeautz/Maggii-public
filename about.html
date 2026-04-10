@@ -391,13 +391,6 @@ html, body {
 }
 .cta-secondary:hover { border-color: var(--muted); color: var(--text); }
 
-/* ── Ambient spectrogram decoration ──────────────────────────────────────── */
-.hero-spec {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  opacity: 0.18;
-  pointer-events: none;
-}
 
 /* ── Section layout ───────────────────────────────────────────────────────── */
 .section {
@@ -794,19 +787,6 @@ function checkGate() {
       <a class="cta-primary" href="/dashboard">View Live Monitor</a>
       <a class="cta-secondary" href="/map">Open Map</a>
     </div>
-    <svg class="hero-spec" viewBox="0 0 1200 48" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="42" width="1200" height="6" rx="1" fill="rgba(200,160,74,0.15)"/>
-      <path d="M90,28 Q112,16 140,26" stroke="rgba(200,160,74,0.5)" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <path d="M125,36 Q152,22 178,34" stroke="rgba(200,160,74,0.3)" stroke-width="4" stroke-linecap="round" fill="none"/>
-      <path d="M320,40 Q348,24 378,18 Q408,12 438,22 Q465,34 490,40" stroke="rgba(122,184,106,0.35)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-      <rect x="610" y="32" width="6" height="14" rx="2" fill="rgba(200,160,74,0.3)"/>
-      <rect x="626" y="28" width="6" height="18" rx="2" fill="rgba(200,160,74,0.25)"/>
-      <rect x="642" y="34" width="5" height="12" rx="2" fill="rgba(200,160,74,0.2)"/>
-      <rect x="657" y="24" width="7" height="22" rx="2" fill="rgba(200,160,74,0.3)"/>
-      <rect x="674" y="32" width="5" height="14" rx="2" fill="rgba(200,160,74,0.22)"/>
-      <path d="M860,44 Q884,34 910,26 Q938,18 964,12 Q990,6 1016,14" stroke="rgba(122,184,106,0.3)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-      <path d="M1105,30 Q1122,18 1142,28" stroke="rgba(200,160,74,0.28)" stroke-width="4" stroke-linecap="round" fill="none"/>
-    </svg>
   </section>
 
   <!-- What we're doing -->
