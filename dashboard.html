@@ -1194,8 +1194,67 @@ html, body {
   to   { opacity: 1; }
 }
 </style>
+
+<!-- ── Access gate (static/public mode only) ──────────────────────────── -->
+<style>
+#cn-gate {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #050805;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+#cn-gate .gate-logo  { font-size: 10px; letter-spacing: 0.35em; color: #5fba7d; margin-bottom: 10px; }
+#cn-gate .gate-title { font-size: 20px; color: #c8ffd0; letter-spacing: 0.12em; margin-bottom: 36px; }
+#cn-gate input {
+  background: #0a0c0a; border: 1px solid #1a3a1a; color: #c8ffd0;
+  font-family: 'Courier New', monospace; font-size: 15px;
+  padding: 10px 16px; width: 230px; outline: none;
+  letter-spacing: 0.08em; text-align: center; border-radius: 3px;
+}
+#cn-gate input:focus { border-color: #5fba7d; }
+#cn-gate .gate-btn {
+  margin-top: 10px; background: none; border: 1px solid #5fba7d;
+  color: #5fba7d; font-family: 'Courier New', monospace; font-size: 11px;
+  letter-spacing: 0.2em; padding: 9px 0; cursor: pointer; width: 230px;
+}
+#cn-gate .gate-btn:hover { background: rgba(95,186,125,0.08); }
+#cn-gate .gate-err { color: #c84a4a; font-size: 10px; letter-spacing: 0.15em; margin-top: 12px; height: 14px; }
+</style>
+<script>
+(function() {
+  const h = window.location.hostname;
+  const isStatic = h !== '' && h !== 'localhost' && !h.endsWith('.local') &&
+    !h.startsWith('10.') && !h.startsWith('192.168.') && !h.startsWith('172.');
+  if (!isStatic || sessionStorage.getItem('cn_auth') === '1') return;
+  document.documentElement.style.visibility = 'hidden';
+  window.addEventListener('DOMContentLoaded', function() {
+    document.documentElement.style.visibility = '';
+    document.getElementById('cn-gate').style.display = 'flex';
+    document.getElementById('cn-gate-input').focus();
+  });
+})();
+function checkGate() {
+  if (document.getElementById('cn-gate-input').value === 'hiJack') {
+    sessionStorage.setItem('cn_auth', '1');
+    document.getElementById('cn-gate').style.display = 'none';
+  } else {
+    document.getElementById('cn-gate-err').textContent = 'ACCESS DENIED';
+    document.getElementById('cn-gate-input').value = '';
+    setTimeout(function() { document.getElementById('cn-gate-err').textContent = ''; }, 2000);
+  }
+}
+</script>
 </head>
 <body>
+<div id="cn-gate">
+  <div class="gate-logo">CRICKETNODE</div>
+  <div class="gate-title">FIELD NETWORK</div>
+  <input id="cn-gate-input" type="password" placeholder="access code" autocomplete="off"
+         onkeydown="if(event.key==='Enter') checkGate()">
+  <button class="gate-btn" onclick="checkGate()">ENTER</button>
+  <div class="gate-err" id="cn-gate-err"></div>
+</div>
 
 <!-- ── Atmospheric effects ─────────────────────────────────────────────────── -->
 <div id="bird-layer">
