@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>CricketNode // Map</title>
+<title>Cricket // Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
@@ -328,6 +328,101 @@ html, body {
   92%  { opacity:0.4; }
   100% { transform:translateX(calc(100vw + 40px));opacity:0; }
 }
+
+/* ── Loading Screen ───────────────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; background: #000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9990; overflow: hidden;
+  transition: opacity 0.8s ease;
+}
+#loading.fade-out { opacity: 0; pointer-events: none; }
+#loading .particles { position: absolute; inset: 0; overflow: hidden; }
+#loading .particle {
+  position: absolute; width: 2px; height: 2px; border-radius: 50%;
+  animation: particle-drift linear infinite;
+}
+@keyframes particle-drift {
+  0%   { transform: translateY(110vh) translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+}
+#loading .waveform {
+  position: absolute; bottom: 80px; left: 0; right: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 3px; height: 60px; padding: 0 20px; opacity: 0.4;
+}
+#loading .wave-bar {
+  flex: 1; max-width: 6px; border-radius: 2px 2px 0 0;
+  animation: map-wave-pulse ease-in-out infinite alternate, map-wave-color 3s linear infinite;
+}
+@keyframes map-wave-pulse {
+  0%   { height: 4px; }
+  100% { height: var(--wave-h); }
+}
+@keyframes map-wave-color {
+  0%   { background: #3a7d52; box-shadow: 0 0 3px rgba(95,186,125,0.4); }
+  40%  { background: #5fba7d; box-shadow: 0 0 5px rgba(95,186,125,0.6); }
+  70%  { background: #4db890; box-shadow: 0 0 4px rgba(77,184,144,0.5); }
+  100% { background: #3a7d52; box-shadow: 0 0 3px rgba(95,186,125,0.4); }
+}
+#loading .load-wordmark {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+#loading .load-brand {
+  font-family: var(--font); font-size: clamp(36px,11vw,58px); font-weight: 700;
+  letter-spacing: 0.22em; color: #5fba7d;
+  text-shadow: 0 0 18px rgba(95,186,125,0.35);
+  animation: load-brand-settle 0.9s ease-out both;
+}
+#loading .load-brand-sub {
+  font-family: var(--font); font-size: clamp(10px,3vw,12px);
+  letter-spacing: 0.25em; color: rgba(95,186,125,0.55); text-transform: uppercase;
+  animation: load-brand-settle 1.1s ease-out both;
+}
+@keyframes load-brand-settle {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+#loading .load-tagline {
+  font-family: var(--font); font-size: clamp(10px,3vw,12px);
+  color: rgba(0,229,255,0.55); letter-spacing: 0.18em; margin-top: 12px;
+  position: relative; z-index: 2;
+}
+#loading .load-maggii {
+  font-family: var(--font); font-size: 10px; color: rgba(255,255,255,0.2);
+  letter-spacing: 0.14em; margin-top: 6px; position: relative; z-index: 2;
+}
+#loading .cricket-wrap {
+  position: relative; z-index: 2; margin-top: 28px;
+  animation: cricket-bounce 0.7s ease-in-out infinite alternate;
+}
+@keyframes cricket-bounce {
+  0%   { transform: translateY(0) scaleX(1); }
+  50%  { transform: translateY(-6px) scaleX(1); }
+  100% { transform: translateY(-2px) scaleX(-1); }
+}
+#loading .cricket-svg { width: 54px; height: 36px; filter: drop-shadow(0 0 6px rgba(95,186,125,0.5)); }
+#loading .progress-wrap {
+  position: absolute; bottom: 28px; left: 24px; right: 24px; z-index: 2;
+}
+#loading .progress-label {
+  font-family: var(--font); font-size: 10px; color: #607888;
+  letter-spacing: 0.15em; margin-bottom: 6px;
+}
+#loading .progress-track {
+  height: 3px; background: #0a0e18; border: 1px solid #1a2a3a;
+  border-radius: 2px; overflow: hidden;
+}
+#loading .progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #3a7d52, #5fba7d, #4db8c0);
+  border-radius: 2px; animation: map-progress-run 2s linear forwards;
+}
+@keyframes map-progress-run { 0% { width: 0%; } 100% { width: 100%; } }
 </style>
 
 <!-- ── Access gate (static/public mode only) ──────────────────────────── -->
@@ -382,8 +477,44 @@ function checkGate() {
 </script>
 </head>
 <body>
+<!-- ── Loading Screen ──────────────────────────────────────────────────────── -->
+<div id="loading">
+  <div class="particles" id="map-particles"></div>
+  <div class="waveform" id="map-waveform"></div>
+  <div class="load-wordmark">
+    <div class="load-brand">STEADY ACRE</div>
+    <div class="load-brand-sub">Finding intelligent life on earth</div>
+  </div>
+  <div class="load-tagline">Cricket · Acoustic Map</div>
+  <div class="load-maggii">a Maggii Software product</div>
+  <div class="cricket-wrap">
+    <svg class="cricket-svg" viewBox="0 0 54 36" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="28" cy="20" rx="13" ry="7" fill="#00ff50"/>
+      <ellipse cx="14" cy="19" rx="5" ry="4.5" fill="#00cc44"/>
+      <circle cx="12" cy="17.5" r="1.2" fill="#000"/>
+      <line x1="12" y1="15" x2="4" y2="8" stroke="#00ff50" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="14" y1="15" x2="8" y2="6" stroke="#00ff50" stroke-width="1.2" stroke-linecap="round"/>
+      <ellipse cx="30" cy="14" rx="10" ry="5" fill="#00cc44" opacity="0.7"/>
+      <line x1="20" y1="24" x2="14" y2="32" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="26" y1="26" x2="22" y2="34" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="32" y1="26" x2="30" y2="34" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="20" y1="24" x2="16" y2="18" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="27" y1="25" x2="24" y2="18" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="34" y1="24" x2="32" y2="18" stroke="#00ff50" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="41" y1="18" x2="48" y2="14" stroke="#00ff50" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="41" y1="21" x2="49" y2="21" stroke="#00ff50" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">LOADING DETECTION MAP...</div>
+    <div class="progress-track">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
 <div id="cn-gate">
-  <div class="gate-logo">CRICKETNODE</div>
+  <div class="gate-logo">CRICKET</div>
   <div class="gate-title">FIELD NETWORK</div>
   <input id="cn-gate-input" type="password" placeholder="access code" autocomplete="off"
          onkeydown="if(event.key==='Enter') checkGate()">
@@ -399,7 +530,8 @@ function checkGate() {
 </div>
 
 <div id="nav">
-  <a class="nav-btn" href="/">&#x1f3e0; MONITOR</a>
+  <a class="nav-btn" href="/">&#x1f331; ABOUT</a>
+  <a class="nav-btn" href="/dashboard">&#x1f4bb; MONITOR</a>
   <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; REVIEW</a>
   <a class="nav-btn nav-active" href="/map">&#x1f5fa; MAP</a>
   <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; FIELD</a>
@@ -439,6 +571,44 @@ function checkGate() {
 
 <script>
 'use strict';
+
+// ── Loading Screen ────────────────────────────────────────────────────────────
+(function initMapLoader() {
+  const colors = ['#00ff50','#00ffcc','#00c8ff','#a000ff','#ff0080','#ff8000','#ffc800'];
+  const pWrap = document.getElementById('map-particles');
+  for (let i = 0; i < 55; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    p.style.cssText = [
+      `width:${size}px`, `height:${size}px`,
+      `left:${Math.random() * 100}%`,
+      `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+      `--drift:${(Math.random() - 0.5) * 120}px`,
+      `animation-duration:${3 + Math.random() * 6}s`,
+      `animation-delay:${Math.random() * 5}s`,
+      `box-shadow:0 0 ${size * 2}px currentColor`,
+    ].join(';');
+    pWrap.appendChild(p);
+  }
+  const wWrap = document.getElementById('map-waveform');
+  for (let i = 0; i < 48; i++) {
+    const b = document.createElement('div');
+    b.className = 'wave-bar';
+    const maxH = 10 + Math.random() * 48;
+    b.style.cssText = [
+      `--wave-h:${maxH}px`,
+      `animation-duration:${0.3 + Math.random() * 0.8}s`,
+      `animation-delay:${Math.random() * 0.5}s`,
+    ].join(';');
+    wWrap.appendChild(b);
+  }
+  setTimeout(() => {
+    const loading = document.getElementById('loading');
+    loading.classList.add('fade-out');
+    setTimeout(() => { loading.style.display = 'none'; }, 800);
+  }, 2000);
+})();
 
 // Detect GitHub Pages / any non-local host → serve from static snapshot files
 const STATIC_MODE = (() => {

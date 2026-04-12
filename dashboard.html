@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>CricketNode Field Monitor</title>
+<title>Cricket Field Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
@@ -243,7 +243,7 @@ html, body {
   width: 0%;
   background: linear-gradient(90deg, #3a7d52, #5fba7d, #4db8c0);
   border-radius: 2px;
-  animation: progress-run 3s linear forwards;
+  animation: progress-run 2s linear forwards;
 }
 
 @keyframes progress-run {
@@ -992,6 +992,12 @@ html, body {
   color: #b8d4bc;
   font-style: italic;
 }
+.notes-body p {
+  margin: 0 0 0.8em 0;
+}
+.notes-body p:last-child {
+  margin-bottom: 0;
+}
 .notes-body.generating {
   color: #445;
   font-style: normal;
@@ -1181,18 +1187,6 @@ html, body {
   100% { transform: translateX(calc(100vw + 40px)); opacity: 0; }
 }
 
-/* ── Spectrogram base decoration ─────────────────────────────────────────── */
-#spectrogram-base {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  width: 100vw; height: 60px;
-  pointer-events: none; z-index: 9980;
-  opacity: 0;
-  animation: spec-fadein 2s ease 1.2s both;
-}
-@keyframes spec-fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
 </style>
 
 <!-- ── Access gate (static/public mode only) ──────────────────────────── -->
@@ -1248,7 +1242,7 @@ function checkGate() {
 </head>
 <body>
 <div id="cn-gate">
-  <div class="gate-logo">CRICKETNODE</div>
+  <div class="gate-logo">CRICKET</div>
   <div class="gate-title">FIELD NETWORK</div>
   <input id="cn-gate-input" type="password" placeholder="access code" autocomplete="off"
          onkeydown="if(event.key==='Enter') checkGate()">
@@ -1265,31 +1259,6 @@ function checkGate() {
   <svg class="bird" style="top:32px;animation-duration:43s;animation-delay:25s" width="16" height="9"  viewBox="0 0 16 9"><path d="M0,7 Q4,0 8,4 Q12,0 16,7"    fill="none" stroke="#4db8c0" stroke-width="1.1" stroke-linecap="round"/></svg>
 </div>
 
-<!-- Acoustic spectrogram base — frequency silhouette of bird call patterns -->
-<svg id="spectrogram-base" viewBox="0 0 1200 80" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-  <!-- Ambient noise floor (low freq) -->
-  <rect x="0" y="70" width="1200" height="8" rx="1" fill="rgba(95,186,125,0.07)"/>
-  <!-- Freq axis labels -->
-  <text x="6" y="76" font-size="6" fill="rgba(95,186,125,0.2)" font-family="monospace" letter-spacing="0.05em">1kHz</text>
-  <text x="6" y="48" font-size="6" fill="rgba(95,186,125,0.16)" font-family="monospace" letter-spacing="0.05em">4kHz</text>
-  <text x="6" y="22" font-size="6" fill="rgba(95,186,125,0.14)" font-family="monospace" letter-spacing="0.05em">8kHz</text>
-  <!-- Call 1: descending whistle (CBCH fee-bee), ~x=100 -->
-  <path d="M95,28 Q118,16 145,26" stroke="rgba(95,186,125,0.42)" stroke-width="5.5" stroke-linecap="round" fill="none"/>
-  <path d="M130,40 Q158,24 185,38" stroke="rgba(95,186,125,0.28)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-  <!-- Call 2: rising-falling arc (Wrentit trill), ~x=340 -->
-  <path d="M330,46 Q358,28 388,20 Q418,14 448,24 Q475,36 500,44" stroke="rgba(77,184,192,0.32)" stroke-width="4" stroke-linecap="round" fill="none"/>
-  <!-- Call 3: chip notes (sparrow), ~x=620 -->
-  <rect x="615" y="38" width="7" height="20" rx="2" fill="rgba(95,186,125,0.30)"/>
-  <rect x="632" y="33" width="7" height="26" rx="2" fill="rgba(95,186,125,0.26)"/>
-  <rect x="649" y="40" width="6" height="18" rx="2" fill="rgba(95,186,125,0.22)"/>
-  <rect x="665" y="30" width="8" height="28" rx="2" fill="rgba(95,186,125,0.30)"/>
-  <rect x="683" y="38" width="6" height="20" rx="2" fill="rgba(95,186,125,0.24)"/>
-  <!-- Call 4: rising warble (hermit thrush), ~x=880 -->
-  <path d="M870,58 Q895,44 920,34 Q948,24 975,16 Q1002,10 1028,18" stroke="rgba(77,184,192,0.30)" stroke-width="4" stroke-linecap="round" fill="none"/>
-  <!-- Call 5: short contact call, ~x=1120 -->
-  <path d="M1110,35 Q1128,22 1148,32" stroke="rgba(95,186,125,0.28)" stroke-width="4" stroke-linecap="round" fill="none"/>
-</svg>
-
 <!-- ── Loading Screen ──────────────────────────────────────────────────────── -->
 <div id="loading">
   <div class="particles" id="particles"></div>
@@ -1300,7 +1269,7 @@ function checkGate() {
     <div class="load-brand">STEADY ACRE</div>
     <div class="load-brand-sub">Finding intelligent life on earth</div>
   </div>
-  <div class="load-tagline">CricketNode · Acoustic Monitoring</div>
+  <div class="load-tagline">Cricket · Acoustic Monitoring</div>
   <div class="load-maggii">a Maggii Software product</div>
   <div class="load-title">STEADY ACRE</div>
 
@@ -1342,7 +1311,7 @@ function checkGate() {
 <!-- ── Main Dashboard ─────────────────────────────────────────────────────── -->
 <div id="dashboard">
   <div class="header">
-    <div class="header-title">// CRICKETNODE //</div>
+    <div class="header-title">// CRICKET //</div>
     <div class="header-right">
       <div class="header-node" id="headerNode">—</div>
       <div class="header-meta">
@@ -1354,7 +1323,8 @@ function checkGate() {
 
   <!-- Nav bar -->
   <div class="nav-bar">
-    <a class="nav-btn nav-active" href="/">&#x1f3e0; Monitor</a>
+    <a class="nav-btn" href="/">&#x1f331; About</a>
+    <a class="nav-btn nav-active" href="/dashboard">&#x1f4bb; Monitor</a>
     <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; Review</a>
     <a class="nav-btn" href="/map">&#x1f5fa; Map</a>
     <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; Field</a>
@@ -1388,7 +1358,7 @@ function checkGate() {
     </div>
 
     <!-- Ambient soundscape -->
-    <div class="section">
+    <div class="section" id="ambientSection">
       <div class="section-title section-title-ambient">Ambient Soundscape</div>
       <div id="ambientArea">
         <div class="ambient-strip">
@@ -1399,7 +1369,7 @@ function checkGate() {
 
     <!-- Field Notes -->
     <div class="section" id="fieldNotesSection">
-      <div class="section-title section-title-notes">Field Notes</div>
+      <div class="section-title section-title-notes">Field Notes <span style="font-size:9px;font-weight:400;letter-spacing:0.08em;color:var(--ts);margin-left:8px">produced by Cricket · local AI</span></div>
       <div id="field-notes-card">
         <div class="notes-meta">
           <span class="notes-date" id="notes-date">—</span>
@@ -1409,9 +1379,10 @@ function checkGate() {
         <div class="notes-stats" id="notes-stats"></div>
         <div class="notes-footer">
           <span class="notes-eta" id="notes-eta"></span>
-          <button class="notes-generate-btn" id="notes-generate-btn" onclick="requestFreshReport()">
+          <button class="notes-generate-btn" id="notes-generate-btn" onclick="requestFreshReport()" style="display:none">
             ↻ Generate Fresh Report
           </button>
+          <span class="notes-generate-btn" id="notes-static-label" style="display:none;cursor:default;border-color:#1a2a1a;color:var(--ts)">Updated nightly</span>
         </div>
       </div>
     </div>
@@ -1444,8 +1415,12 @@ const STATIC_MODE = (() => {
 const R2_CLIP_BASE = 'https://pub-fbadc80b23f94a2bbc8e9802b0f0b9aa.r2.dev';
 
 if (STATIC_MODE) {
-  document.getElementById('nav-review').style.display = 'none';
-  document.getElementById('nav-field').style.display  = 'none';
+  document.getElementById('nav-review').style.display       = 'none';
+  document.getElementById('nav-field').style.display        = 'none';
+  document.getElementById('notes-static-label').style.display = '';
+  document.getElementById('ambientSection').style.display   = 'none';
+} else {
+  document.getElementById('notes-generate-btn').style.display = '';
 }
 
 /* ── State ──────────────────────────────────────────────────────────────── */
@@ -1496,7 +1471,7 @@ const leafletMaps   = {};   // mapDivId -> L.map instance
     wWrap.appendChild(b);
   }
 
-  // After 3s, fade out and show dashboard
+  // After 2s, fade out and show dashboard
   setTimeout(() => {
     const loading = document.getElementById('loading');
     const dash    = document.getElementById('dashboard');
@@ -1505,7 +1480,7 @@ const leafletMaps   = {};   // mapDivId -> L.map instance
     setTimeout(() => { loading.style.display = 'none'; }, 800);
     initPoll();
     relTimeTimer = setInterval(refreshRelativeTimes, 30000);
-  }, 3000);
+  }, 2000);
 })();
 
 /* ── Clock sync — push phone time to Pi on every page load ─────────────── */
@@ -1616,9 +1591,12 @@ function renderReport(d) {
     triggersEl.appendChild(badge);
   });
 
-  // Narrative
-  bodyEl.textContent = d.narrative;
-  bodyEl.className   = 'notes-body';
+  // Narrative — split on double newline for paragraph breaks
+  bodyEl.innerHTML = d.narrative
+    .split(/\n\n+/)
+    .map(p => `<p>${p.replace(/\n/g, ' ').trim()}</p>`)
+    .join('');
+  bodyEl.className = 'notes-body';
 
   // Stats row
   statsEl.innerHTML = '';
@@ -1672,6 +1650,22 @@ function handleData(data) {
   lastUpdated = Date.now();
 
   const nodes = data.nodes || [];
+
+  if (STATIC_MODE) {
+    // Public site: merge all nodes into one unified feed, no per-node UI
+    document.getElementById('nodeTabsSection').style.display = 'none';
+    const selfNode = nodes.find(n => n.self) || nodes[0] || {};
+    const merged = {
+      ...selfNode,
+      detections: nodes.flatMap(n => n.detections || [])
+                       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+      events:     nodes.flatMap(n => n.events || [])
+                       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+    };
+    renderNode(merged);
+    updateHeader(data);
+    return;
+  }
 
   // Ensure activeNodeId is valid
   if (!activeNodeId || !nodes.find(n => n.node_id === activeNodeId)) {
@@ -1736,7 +1730,7 @@ function updateHeader(data) {
   const updEl      = document.getElementById('headerUpdated');
   const gpsDot     = document.getElementById('gpsDot');
 
-  nodeEl.textContent = data.tap_node || '—';
+  nodeEl.textContent = STATIC_MODE ? 'Steady Acre' : (data.tap_node || '—');
 
   if (lastUpdated) {
     updEl.textContent = 'upd ' + formatRelTime(lastUpdated / 1000);
@@ -1891,7 +1885,7 @@ function renderActivityFeed(events, confirmedDetections, gps) {
       if (isOpen) populateDetail(card.querySelector('.card-detail'), ev, confirmedDetections, gps);
       list.appendChild(card);
 
-    } else if (type === 'near_miss') {
+    } else if (type === 'near_miss' && !STATIC_MODE) {
       const blendPct = Math.round((ev.blend || ev.confidence || 0) * 100);
       const simPct   = Math.round((ev.sim || 0) * 100);
       if (ev.confidence == null) ev.confidence = ev.blend || 0;
@@ -2071,8 +2065,8 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
     html += `</div>`;
   }
 
-  /* ---- BirdNET cross-reference ---- */
-  html += bnDetailHtml(detection);
+  /* ---- BirdNET cross-reference — local only ---- */
+  if (!STATIC_MODE) html += bnDetailHtml(detection);
 
   /* ---- Chorus detection list (shown when _chorus present) ---- */
   if (detection._chorus && detection._chorus.length > 1) {
@@ -2350,8 +2344,10 @@ function populateNearMissDetail(detailEl, ev) {
   html += `<span style="color:#445;font-size:10px">Below detection threshold — clip saved for review</span>`;
   html += `</div>`;
 
-  /* Review link */
-  html += `<a class="event-review-link" href="/review" style="margin-top:10px;display:inline-block">Label in Review ›</a>`;
+  /* Review link — local only */
+  if (!STATIC_MODE) {
+    html += `<a class="event-review-link" href="/review" style="margin-top:10px;display:inline-block">Label in Review ›</a>`;
+  }
 
   detailEl.innerHTML = html;
 
@@ -2441,11 +2437,16 @@ function renderAmbient(ambient) {
   const chorus = ambient.chorus_active
     ? '<div class="chorus-badge">CHORUS</div>' : '';
 
+  const ambientNote = STATIC_MODE
+    ? `<div style="font-size:9px;color:var(--ts);letter-spacing:0.06em;margin-top:4px">Site ambient — classifications reflect local acoustic conditions</div>`
+    : '';
+
   area.innerHTML = `
     <div class="ambient-strip">
       <div class="ambient-left">
         <div class="ambient-label">${escHtml(ambient.label || '—')}</div>
         ${pct ? `<div class="ambient-bird-pct">${pct}</div>` : ''}
+        ${ambientNote}
       </div>
       ${chorus}
     </div>
