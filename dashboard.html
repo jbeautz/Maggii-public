@@ -1187,6 +1187,187 @@ html, body {
   100% { transform: translateX(calc(100vw + 40px)); opacity: 0; }
 }
 
+/* ── iNaturalist Integration ─────────────────────────────────────────────── */
+.inat-auth-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--ts);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.inat-auth-indicator .inat-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+}
+.inat-auth-indicator .inat-username {
+  color: var(--accent);
+}
+.inat-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid #2a5a3a;
+  border-radius: 3px;
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.inat-share-btn:hover { background: #0a1a10; border-color: var(--accent); }
+.inat-share-btn:disabled { opacity: 0.4; cursor: default; }
+.inat-share-btn.shared {
+  border-color: var(--r-cyan);
+  color: var(--r-cyan);
+}
+.inat-shared-link {
+  font-size: 10px;
+  color: var(--r-cyan);
+  margin-top: 4px;
+  display: block;
+}
+.inat-prior-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--ts);
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+.inat-prior-badge .prior-arrow { color: var(--r-cyan); }
+
+/* ── ShareModal overlay ──────────────────────────────────────────────────── */
+.share-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.share-modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.share-modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.share-modal-title {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.share-modal-field {
+  margin-bottom: 12px;
+}
+.share-modal-label {
+  font-size: 9px;
+  color: var(--label);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.share-modal-value {
+  font-size: 12px;
+  color: var(--species);
+  padding: 6px 8px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+}
+.share-modal-input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--species);
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 6px 8px;
+  resize: vertical;
+  min-height: 60px;
+}
+.share-modal-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.share-modal-warning {
+  background: rgba(200,160,74,0.1);
+  border: 1px solid rgba(200,160,74,0.3);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--r-yellow);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.share-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.share-modal-btn {
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.share-modal-btn.cancel {
+  background: transparent;
+  color: var(--ts);
+}
+.share-modal-btn.confirm {
+  background: #1a3a2a;
+  color: var(--accent);
+  border-color: #2a5a3a;
+}
+.share-modal-btn.confirm:hover { background: #2a4a3a; }
+.share-modal-btn.confirm:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.share-modal-status {
+  font-size: 11px;
+  margin-top: 10px;
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+.share-modal-status.error {
+  background: rgba(200,74,74,0.1);
+  color: var(--r-red);
+}
+.share-modal-status.success {
+  background: rgba(95,186,125,0.1);
+  color: var(--accent);
+}
+
 </style>
 
 <!-- ── Access gate (static/public mode only) ──────────────────────────── -->
@@ -1315,6 +1496,7 @@ function checkGate() {
     <div class="header-right">
       <div class="header-node" id="headerNode">—</div>
       <div class="header-meta">
+        <div class="inat-auth-indicator" id="inatAuthIndicator" style="display:none" onclick="window.location='/inat/auth/start'"></div>
         <div class="gps-dot" id="gpsDot"></div>
         <div class="header-updated" id="headerUpdated">—</div>
       </div>
@@ -1328,6 +1510,7 @@ function checkGate() {
     <a class="nav-btn" href="/review" id="nav-review">&#x1f3f7; Review</a>
     <a class="nav-btn" href="/map">&#x1f5fa; Map</a>
     <a class="nav-btn" href="/field" id="nav-field">&#x1f52c; Field</a>
+    <a class="nav-btn" href="/inat/species/local" id="nav-species" style="display:none">&#x1f33f; Species</a>
   </div>
 
   <div class="content" id="contentArea">
@@ -1399,6 +1582,43 @@ function checkGate() {
   <div class="status-bar" id="statusBar">
     <div class="status-dot error" id="statusDot"></div>
     <div class="status-text error" id="statusText">CONNECTING...</div>
+  </div>
+</div>
+
+<!-- ── iNat Share Modal ───────────────────────────────────────────────────── -->
+<div class="share-modal-overlay" id="shareModalOverlay">
+  <div class="share-modal" onclick="event.stopPropagation()">
+    <div class="share-modal-title">Share to iNaturalist</div>
+    <div id="shareModalWarning" class="share-modal-warning" style="display:none"></div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Species</div>
+      <div class="share-modal-value" id="shareModalSpecies">—</div>
+    </div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Confidence</div>
+      <div class="share-modal-value" id="shareModalConf">—</div>
+    </div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Observed</div>
+      <div class="share-modal-value" id="shareModalTime">—</div>
+    </div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Audio Clip</div>
+      <div class="share-modal-value" id="shareModalClip">—</div>
+    </div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Description</div>
+      <textarea class="share-modal-input" id="shareModalDesc"></textarea>
+    </div>
+    <div class="share-modal-field">
+      <div class="share-modal-label">Tags</div>
+      <div class="share-modal-value" id="shareModalTags">—</div>
+    </div>
+    <div id="shareModalStatus" style="display:none"></div>
+    <div class="share-modal-actions">
+      <button class="share-modal-btn cancel" onclick="closeShareModal()">Cancel</button>
+      <button class="share-modal-btn confirm" id="shareModalConfirm" onclick="confirmShare()">Confirm Share</button>
+    </div>
   </div>
 </div>
 
@@ -1885,7 +2105,7 @@ function renderActivityFeed(events, confirmedDetections, gps) {
       if (isOpen) populateDetail(card.querySelector('.card-detail'), ev, confirmedDetections, gps);
       list.appendChild(card);
 
-    } else if (type === 'near_miss' && !STATIC_MODE) {
+    } else if (type === 'near_miss') {
       const blendPct = Math.round((ev.blend || ev.confidence || 0) * 100);
       const simPct   = Math.round((ev.sim || 0) * 100);
       if (ev.confidence == null) ev.confidence = ev.blend || 0;
@@ -2063,6 +2283,11 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
       html += `<div class="audio-no-clip">No clip available for this detection</div>`;
     }
     html += `</div>`;
+  }
+
+  /* ---- iNaturalist share button ---- */
+  if (!STATIC_MODE) {
+    html += inatShareBtnHtml(detection);
   }
 
   /* ---- BirdNET cross-reference — local only ---- */
@@ -2571,6 +2796,150 @@ function escAttr(s) {
   // Make a safe CSS id / attribute from a key string
   return String(s).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
+
+// ── iNaturalist integration ───────────────────────────────────────────────
+let _inatAuth = null;        // {authenticated, username, avatar_url} or null
+let _shareModalData = null;  // current detection being shared
+
+function initInat() {
+  if (STATIC_MODE) return;
+  fetch('/inat/status').then(r => r.json()).then(data => {
+    _inatAuth = data;
+    updateInatUI();
+  }).catch(() => {});
+}
+
+function updateInatUI() {
+  const indicator = document.getElementById('inatAuthIndicator');
+  const navSpecies = document.getElementById('nav-species');
+  if (!_inatAuth || !_inatAuth.enabled) {
+    indicator.style.display = 'none';
+    if (navSpecies) navSpecies.style.display = 'none';
+    return;
+  }
+  indicator.style.display = 'inline-flex';
+  if (navSpecies) navSpecies.style.display = '';
+  if (_inatAuth.authenticated) {
+    const avatar = _inatAuth.avatar_url
+      ? `<img class="inat-avatar" src="${escHtml(_inatAuth.avatar_url)}" alt="">`
+      : '';
+    indicator.innerHTML = avatar + `<span class="inat-username">${escHtml(_inatAuth.username)}</span>`;
+    indicator.onclick = null;
+    indicator.title = 'Connected to iNaturalist as ' + _inatAuth.username;
+  } else {
+    indicator.innerHTML = '<span style="color:var(--r-yellow)">iNat</span>';
+    indicator.onclick = () => { window.location = '/inat/auth/start'; };
+    indicator.title = 'Click to connect iNaturalist account';
+  }
+}
+
+function inatShareBtnHtml(ev) {
+  if (STATIC_MODE || !_inatAuth || !_inatAuth.enabled || !_inatAuth.authenticated) return '';
+  if (!ev || ev.type !== 'detection') return '';
+  const eventId = (ev.species || '') + '_' + (ev.timestamp || '');
+  return `<button class="inat-share-btn" id="inat-share-${escAttr(eventId)}"
+    onclick="event.stopPropagation();openShareModal(this)" data-ev='${escHtml(JSON.stringify({
+      species: ev.species, confidence: ev.confidence, timestamp: ev.timestamp,
+      clip_path: ev.clip_path, event_id: eventId,
+    }))}'>&#x1F33F; Share to iNaturalist</button>`;
+}
+
+function openShareModal(btn) {
+  const evData = JSON.parse(btn.dataset.ev);
+  _shareModalData = evData;
+  const overlay = document.getElementById('shareModalOverlay');
+  document.getElementById('shareModalSpecies').textContent = evData.species || '?';
+  const confPct = Math.round((evData.confidence || 0) * 100);
+  document.getElementById('shareModalConf').textContent = confPct + '%';
+  document.getElementById('shareModalTime').textContent = evData.timestamp || '—';
+  document.getElementById('shareModalClip').textContent = evData.clip_path
+    ? evData.clip_path.split('/').pop() : 'No audio clip';
+
+  const desc = `Detected by CricketNode acoustic sensor. Perch confidence: ${(evData.confidence || 0).toFixed(2)}.`;
+  document.getElementById('shareModalDesc').value = desc;
+  document.getElementById('shareModalTags').textContent = 'bioacoustics, cricketnode, passive-monitoring';
+
+  // Show warning if low confidence
+  const warning = document.getElementById('shareModalWarning');
+  if ((evData.confidence || 0) < 0.6) {
+    warning.style.display = 'block';
+    warning.textContent = 'This detection is low-confidence or outside known local range. Please verify before sharing.';
+  } else {
+    warning.style.display = 'none';
+  }
+
+  document.getElementById('shareModalStatus').style.display = 'none';
+  document.getElementById('shareModalConfirm').disabled = false;
+  overlay.classList.add('visible');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModalOverlay').classList.remove('visible');
+  _shareModalData = null;
+}
+
+function confirmShare() {
+  if (!_shareModalData) return;
+  const btn = document.getElementById('shareModalConfirm');
+  btn.disabled = true;
+  btn.textContent = 'Sharing...';
+
+  const statusEl = document.getElementById('shareModalStatus');
+  statusEl.style.display = 'none';
+
+  const payload = {
+    species: _shareModalData.species,
+    confidence: _shareModalData.confidence,
+    timestamp: _shareModalData.timestamp,
+    clip_path: _shareModalData.clip_path,
+    description: document.getElementById('shareModalDesc').value,
+    tags: document.getElementById('shareModalTags').textContent.split(',').map(t => t.trim()),
+  };
+
+  const eventId = encodeURIComponent(_shareModalData.event_id);
+  fetch('/inat/share/' + eventId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  .then(r => r.json())
+  .then(data => {
+    statusEl.style.display = 'block';
+    if (data.success) {
+      statusEl.className = 'share-modal-status success';
+      statusEl.innerHTML = 'Shared successfully! <a href="' + escHtml(data.url) + '" target="_blank" style="color:var(--r-cyan)">' + escHtml(data.url) + '</a>';
+      btn.textContent = 'Done';
+      setTimeout(closeShareModal, 3000);
+    } else {
+      statusEl.className = 'share-modal-status error';
+      statusEl.textContent = data.error || 'Share failed.';
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    }
+  })
+  .catch(err => {
+    statusEl.style.display = 'block';
+    statusEl.className = 'share-modal-status error';
+    statusEl.textContent = 'Network error: ' + err.message;
+    btn.disabled = false;
+    btn.textContent = 'Retry';
+  });
+}
+
+// Close modal on overlay click
+document.getElementById('shareModalOverlay').addEventListener('click', closeShareModal);
+
+// Check for auth callback result in URL
+(function checkInatAuthResult() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('inat_auth') === 'success') {
+    history.replaceState({}, '', '/dashboard');
+    setTimeout(() => initInat(), 500);
+  }
+})();
+
+// Init iNat on page load (after SSE connects)
+if (!STATIC_MODE) setTimeout(initInat, 1000);
 
 // ── BirdNET helpers ───────────────────────────────────────────────────────
 function bnBadgeHtml(ev) {
