@@ -741,7 +741,7 @@ function updateTimeline() {
   const countEl = document.getElementById('tl-det-count');
   let label = '';
   if (dets) label = `${dets} det${dets > 1 ? 's' : ''}`;
-  if (nms)  label += (label ? '  ·  ' : '') + `${nms} near-miss${nms > 1 ? 'es' : ''}`;
+  if (nms)  label += (label ? '  ·  ' : '') + `${nms} almost match${nms > 1 ? 'es' : ''}`;
   countEl.textContent = label;
 
   renderHistoryMarkers();
@@ -841,7 +841,7 @@ function buildHistPopup(cluster) {
 
   const locStr = `${cluster.lat.toFixed(4)}, ${cluster.lon.toFixed(4)}`;
   const detLbl = cluster.detections.length ? `${cluster.detections.length} detection${cluster.detections.length > 1 ? 's' : ''}` : '';
-  const nmLbl  = cluster.nearMisses.length  ? `${cluster.nearMisses.length} near-miss${cluster.nearMisses.length > 1 ? 'es' : ''}` : '';
+  const nmLbl  = cluster.nearMisses.length  ? `${cluster.nearMisses.length} almost match${cluster.nearMisses.length > 1 ? 'es' : ''}` : '';
   const summaryParts = [detLbl, nmLbl].filter(Boolean);
 
   return `<div class="popup-node-id" style="color:var(--green)">${summaryParts.join(' · ')}</div>

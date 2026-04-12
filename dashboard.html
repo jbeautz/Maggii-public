@@ -2116,7 +2116,7 @@ function renderActivityFeed(events, confirmedDetections, gps) {
       card.dataset.ts = ev.timestamp || '';
       card.dataset.cardKey = cardKey;
       card.innerHTML = `
-        <div class="event-badge">&#x7e; Near miss</div>
+        <div class="event-badge">&#x7e; Almost match</div>
         <div class="detection-top">
           <div class="detection-species">${escHtml(ev.species || '?')}</div>
           <div class="detection-icon">&#x1f50d;</div>
@@ -2254,7 +2254,7 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   const speciesHist = allDetections
     .filter(d => d.species === species)
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  // For TOD: use allEvents (includes near misses) when provided, else fall back to speciesHist
+  // For TOD: use allEvents (includes almost matches) when provided, else fall back to speciesHist
   const todSource = allEvents
     ? allEvents.filter(e => e.species === species)
     : speciesHist;
@@ -2312,9 +2312,9 @@ function populateDetail(detailEl, detection, allDetections, gps, allEvents) {
   }
 
   /* ---- Species history ---- */
-  // For near miss cards (allEvents passed, speciesHist empty), show near miss history instead
+  // For almost match cards (allEvents passed, speciesHist empty), show almost match history instead
   const histSource = speciesHist.length > 0 ? speciesHist : todSource.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  const histLabel  = speciesHist.length > 0 ? 'Detections' : 'Near Misses';
+  const histLabel  = speciesHist.length > 0 ? 'Detections' : 'Almost Matches';
   html += `<div class="detail-section-title">All ${escHtml(species)} ${histLabel} (${histSource.length})</div>`;
   html += `<div class="history-list">`;
   histSource.forEach(h => {
@@ -2510,7 +2510,7 @@ function initDetailMap(divId, gpsPoints) {
   leafletMaps[divId] = m;
 }
 
-/* ── Near-miss expand/collapse ──────────────────────────────────────────── */
+/* ── Almost-match expand/collapse ──────────────────────────────────────────── */
 function toggleNearMissCard(card, ev) {
   const key    = card.dataset.cardKey;
   const detail = card.querySelector('.card-detail');
